@@ -12,6 +12,19 @@ import matplotlib.pyplot as plt
 
 # NUMERICAL SCHEMES
 def Euler_Forward(func, points, X):
+    ''' 
+    
+    Explicit Euler method for numerical integration.
+    
+    Input:
+        - func: function that represents the system of ODEs
+        - points: vector of time points
+        - X: initial state
+    
+    Output:
+        - x: matrix of states at each time point
+        
+    '''
     n = len(points)
     x = np.zeros((n,) + X.shape) 
     x[0] = X
@@ -21,6 +34,20 @@ def Euler_Forward(func, points, X):
     return x
 
 def Euler_Backward(func, points, X, e=1.0e-6):
+    ''' 
+    
+    Implicit Euler method for numerical integration.
+    
+    Input:
+        - func: function that represents the system of ODEs
+        - points: vector of time points
+        - X: initial state
+        - e: tolerance for convergence
+    
+    Output:
+        - x: matrix of states at each time point
+        
+    '''
     n = len(points)
     x = np.zeros((n,) + X.shape)
     x[0] = X 
@@ -35,6 +62,20 @@ def Euler_Backward(func, points, X, e=1.0e-6):
     return x
 
 def Crank_Nicholson(func, points, X, e=1.0e-6):
+    ''' 
+    
+    Crank-Nicholson method for numerical integration.
+    
+    Input:
+        - func: function that represents the system of ODEs
+        - points: vector of time points
+        - X: initial state
+        - e: tolerance for convergence
+    
+    Output:
+        - x: matrix of states at each time point
+        
+    '''
     n = len(points)
     x = np.zeros((n,) + X.shape)
     x[0] = X
@@ -51,7 +92,33 @@ def Crank_Nicholson(func, points, X, e=1.0e-6):
 
 # COUPLED OSCILLATOR
 class coupled_oscillator:
+    ''' 
+    
+    Class representing a coupled oscillator system.
+    
+    Assumptions:
+        - fixed: positions of fixed points
+        - masses: masses of moving points
+        - springs: spring constants and connections
+        
+    
+    '''
     def __init__(self, fixed, masses, springs):
+        '''
+        
+        Parameters:
+        ----------
+        fixed :
+            TYPE: np.ndarray
+            DESCRIPTION: array of fixed point positions
+        masses :
+            TYPE: np.ndarray
+            DESCRIPTION: array of masses of moving points
+        springs :
+            TYPE: np.ndarray
+            DESCRIPTION: array of spring constants and their connections
+            
+        '''
         self.fixed = fixed
         self.masses = masses
         self.springs = springs
@@ -59,6 +126,18 @@ class coupled_oscillator:
         self.n_mobili = len(masses)             # number of moving vertices
 
     def __call__(self, points, x):   
+        ''' 
+        
+        Calculate the state of the system at given time points.
+        
+        Input:
+            - points: vector of time points
+            - x: initial state matrix
+        
+        Output:
+            - eq_acc: matrix of state at each time point
+            
+        '''
         eq_acc = np.zeros((self.n_mobili, 4))        
         eq_acc[:,0:2] = x[:,2:4]                     
         eq_acc[:,2:4] = self.acceleration(x[:,0:2]) 
@@ -66,8 +145,28 @@ class coupled_oscillator:
         
 
 # Adjacency list
-class lista_adiacenza(coupled_oscillator):
+class list_adjacent(coupled_oscillator):
+    ''' 
+    
+    Class representing a coupled oscillator system using an adjacency list.
+    
+    '''
     def __init__(self, fixed, masses, springs):
+        '''
+        
+        Parameters:
+        ----------
+        fixed :
+            TYPE: np.ndarray
+            DESCRIPTION: array of fixed point positions
+        masses :
+            TYPE: np.ndarray
+            DESCRIPTION: array of masses of moving points
+        springs :
+            TYPE: list
+            DESCRIPTION: adjacency list of spring constants and their connections
+            
+        '''
         self.fixed = fixed
         self.masses = masses
         self.springs = springs    
@@ -75,6 +174,17 @@ class lista_adiacenza(coupled_oscillator):
         self.n_mobili = len(masses)
     
     def acceleration(self, mobili):
+        ''' 
+        
+        Calculate the acceleration of moving points.
+        
+        Input:
+            - mobili: array of positions of moving points
+        
+        Output:
+            - eq_acc: array of accelerations of moving points
+            
+        '''
         pos = np.concatenate((mobili, self.fixed), axis = 0)  
         eq_acc = np.zeros((self.n_mobili, 2))
         for i in range(self.n_mobili):          
@@ -86,8 +196,28 @@ class lista_adiacenza(coupled_oscillator):
 
 
 # Matrix adjacency
-class matrice_adiacenza(coupled_oscillator):
+class matrix_adjacent(coupled_oscillator):
+    ''' 
+    
+   Class representing a coupled oscillator system using an adjacency matrix.
+   
+   '''
     def __init__(self, fixed, masses, springs):
+        '''
+        
+        Parameters:
+        ----------
+        fixed :
+            TYPE: np.ndarray
+            DESCRIPTION: array of fixed point positions
+        masses :
+            TYPE: np.ndarray
+            DESCRIPTION: array of masses of moving points
+        springs :
+            TYPE: np.ndarray
+            DESCRIPTION: adjacency matrix of spring constants and their connections
+            
+        '''
         self.fixed = fixed
         self.masses = masses
         self.springs = springs    
@@ -95,6 +225,17 @@ class matrice_adiacenza(coupled_oscillator):
         self.n_mobili = len(masses) 
         
     def acceleration(self, mobili):
+        ''' 
+        
+        Calculate the acceleration of moving points.
+        
+        Input:
+            - mobili: array of positions of moving points
+        
+        Output:
+            - eq_acc: array of accelerations of moving points
+            
+        '''
         pos = np.concatenate((mobili, self.fixed), axis=0)
         forces = (self.springs@pos - np.reshape(np.sum(self.springs, axis=1), (self.n_mobili, 1)) * mobili)
         masses = np.reshape(self.masses, (self.n_mobili, 1))
@@ -104,8 +245,28 @@ class matrice_adiacenza(coupled_oscillator):
 
 
 # Incidence list
-class lista_incidenza(coupled_oscillator):
+class list_incidence(coupled_oscillator):
+    ''' 
+    
+    Class representing a coupled oscillator system using an incidence list.
+    
+    '''
     def __init__(self, fixed, masses, springs):
+        '''
+        
+        Parameters:
+        ----------
+        fixed :
+            TYPE: np.ndarray
+            DESCRIPTION: array of fixed point positions
+        masses :
+            TYPE: np.ndarray
+            DESCRIPTION: array of masses of moving points
+        springs :
+            TYPE: list
+            DESCRIPTION: incidence list of spring constants and their connections
+            
+        '''
         self.fixed = fixed
         self.masses = masses
         self.springs = springs    
@@ -113,6 +274,17 @@ class lista_incidenza(coupled_oscillator):
         self.n_mobili = len(masses) 
     
     def acceleration(self, mobili):
+        ''' 
+        
+        Calculate the acceleration of moving points.
+        
+        Input:
+            - mobili: array of positions of moving points
+        
+        Output:
+            - eq_acc: array of accelerations of moving points
+            
+        '''
         pos = np.concatenate((mobili, self.fixed), axis=0)
         eq_acc = np.zeros((self.n_mobili, 2))
         for (i, j, kmolla) in self.springs:
@@ -130,6 +302,7 @@ class lista_incidenza(coupled_oscillator):
 
 # TEST
 if __name__ == '__main__':
+    
     # Fixed vertex position, I assume chce are not connected by springs
     fixed = np.array([[0.0,0.0],[0.0,5.0],[5.0,5.0],[5.0,0.0]])   
     
@@ -154,9 +327,9 @@ if __name__ == '__main__':
     
     
     # Functions
-    f_list_adjacency = lista_adiacenza(fixed, masses, spring_list_adjacent)
-    f_matrix_adjacent = matrice_adiacenza(fixed, masses, springs_matrix_adjacent)
-    f_list_incidence = lista_incidenza(fixed, masses, springs_list_incidence)
+    f_list_adjacency = list_adjacent(fixed, masses, spring_list_adjacent)
+    f_matrix_adjacent = matrix_adjacent(fixed, masses, springs_matrix_adjacent)
+    f_list_incidence = list_incidence(fixed, masses, springs_list_incidence)
     
     # Time
     points_max = 4
